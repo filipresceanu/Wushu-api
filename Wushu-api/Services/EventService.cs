@@ -8,12 +8,12 @@ namespace Wushu_api.Services
     public class EventService:IEventService
     {
         private IEventRepository _eventRepository;
-        private IMapper _mapper;
+       
 
         public EventService(IEventRepository eventRepository,IMapper mapper)
         {
             _eventRepository = eventRepository;
-            _mapper = mapper;
+            
         }
 
         public async Task CreateEvent(Event competiton)
@@ -21,7 +21,12 @@ namespace Wushu_api.Services
            await _eventRepository.CreateEvent(competiton);
         }
 
-      
+        public async Task<Event> GetEvent(Guid id)
+        {
+            var element= await _eventRepository.GetEventId(id);
+            return element;
+        }
+
         public async Task<IEnumerable<EventDto>> GetEvents()
         {
             var events= await _eventRepository.GetAllEvents();

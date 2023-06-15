@@ -22,13 +22,35 @@ namespace Wushu_api.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Wushu_api.Models.Event", b =>
+            modelBuilder.Entity("Wushu_api.Models.Category", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("GraterThanAge")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<int>("LessThanAge")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Sex")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Weight")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("Wushu_api.Models.Event", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
@@ -42,16 +64,42 @@ namespace Wushu_api.Migrations
                     b.ToTable("Events");
                 });
 
-            modelBuilder.Entity("Wushu_api.Models.Participant", b =>
+            modelBuilder.Entity("Wushu_api.Models.Match", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CompetitorFirstId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CompetitorSecondId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("MatchNumber")
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<Guid>("ParticipantId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParticipantId");
+
+                    b.ToTable("Matches");
+                });
+
+            modelBuilder.Entity("Wushu_api.Models.Participant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("BirthDay")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("CategoryId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("CategoryWeight")
                         .HasColumnType("int");
@@ -60,18 +108,25 @@ namespace Wushu_api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("EventId")
-                        .HasColumnType("int");
+                    b.Property<string>("Color")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("PointNumber")
+                        .HasColumnType("int");
+
                     b.Property<string>("Sex")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
 
                     b.HasIndex("EventId");
 
@@ -115,20 +170,47 @@ namespace Wushu_api.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("Wushu_api.Models.Match", b =>
+                {
+                    b.HasOne("Wushu_api.Models.Participant", "Participant")
+                        .WithMany("Matches")
+                        .HasForeignKey("ParticipantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Participant");
+                });
+
             modelBuilder.Entity("Wushu_api.Models.Participant", b =>
                 {
+                    b.HasOne("Wushu_api.Models.Category", "Category")
+                        .WithMany("Participants")
+                        .HasForeignKey("CategoryId");
+
                     b.HasOne("Wushu_api.Models.Event", "Event")
                         .WithMany("Participants")
                         .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Category");
+
                     b.Navigation("Event");
+                });
+
+            modelBuilder.Entity("Wushu_api.Models.Category", b =>
+                {
+                    b.Navigation("Participants");
                 });
 
             modelBuilder.Entity("Wushu_api.Models.Event", b =>
                 {
                     b.Navigation("Participants");
+                });
+
+            modelBuilder.Entity("Wushu_api.Models.Participant", b =>
+                {
+                    b.Navigation("Matches");
                 });
 #pragma warning restore 612, 618
         }

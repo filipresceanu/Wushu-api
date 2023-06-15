@@ -9,7 +9,11 @@ namespace Wushu_api.Repository
 
         Task DeleteEvent(Event competition);
 
+        Task<Event> GetEventId(Guid  eventId);
+
         Task<IEnumerable<EventDto>> GetAllEvents();
+
+        //TODO edit event
 
 
     }

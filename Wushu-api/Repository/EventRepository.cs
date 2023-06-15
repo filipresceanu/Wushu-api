@@ -12,9 +12,10 @@ namespace Wushu_api.Repository
         private readonly DataContext _dataContext;
         private readonly IMapper _mapper;
 
-        public EventRepository(DataContext dataContext)
+        public EventRepository(DataContext dataContext,IMapper mapper)
         {
             _dataContext = dataContext;
+            _mapper= mapper;
         }
 
       
@@ -32,9 +33,16 @@ namespace Wushu_api.Repository
 
         public async Task<IEnumerable<EventDto>> GetAllEvents()
         {
-            var events= _dataContext.Events.ProjectTo<EventDto>(_mapper.ConfigurationProvider).ToListAsync();
-            
+            var events= _dataContext.Events.ProjectTo<EventDto>(_mapper.ConfigurationProvider).ToListAsync();           
             return await events;
         }
+
+        public async Task<Event> GetEventId(Guid eventId)
+        {
+            var competition=await _dataContext.Events.SingleOrDefaultAsync(element=>element.Id==eventId);
+            return  competition;
+        }
+
+      
     }
 }

@@ -12,11 +12,19 @@ namespace Wushu_api.Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
-            optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=userdb;Trusted_Connection=true");
+            optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=wushudb;Trusted_Connection=true");
         }
 
         public DbSet<User> Users { get; set; }
         public DbSet<Participant> Participants { get; set; }
         public DbSet<Event> Events { get; set; }
+
+        public DbSet<Category> Categories { get; set; }
+
+        public DbSet<Match> Matches { get; set; }
+
+       
+
+
     }
 }

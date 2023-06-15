@@ -8,5 +8,7 @@ namespace Wushu_api.Services
         Task CreateEvent(Event competiton);
 
         Task<IEnumerable<EventDto>> GetEvents(); 
+
+        Task<Event>GetEvent(Guid id);
     }
 }
