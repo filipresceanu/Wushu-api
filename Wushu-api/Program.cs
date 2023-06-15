@@ -17,6 +17,7 @@ builder.Services.AddScoped<IParticipantService, ParticipantService>();
 builder.Services.AddScoped<IParticipantRepository, ParticipantRepository>();
 builder.Services.AddScoped<ICategoryService,CategoryService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IMatchRepository,MatchRepository>();
 builder.Services.AddScoped<IMatchService,MatchService>();
 builder.Services.AddDbContext<DataContext>();
 

@@ -12,55 +12,54 @@ namespace Wushu_api.Repository
     {
         private readonly IMapper _mapper;
         private readonly DataContext _dataContext;
-        private readonly IEventRepository _eventRepository;
-        private readonly ICategoryRepository _categoryRepository;
-        public ParticipantRepository(DataContext context,IMapper mapper,IEventRepository eventRepository,ICategoryRepository categoryRepository)
+    
+        public ParticipantRepository(DataContext context,IMapper mapper)
         {
             _mapper = mapper;
             _dataContext = context;
-            _eventRepository = eventRepository;
-            _categoryRepository = categoryRepository;
+           
         }
 
-        public async Task AddParticipantsInCompetition(Guid competitionId, ParticipantDto participantDto)
+        public async Task AddParticipantsInCompetition(Guid competitionId, Participant participant)
         {
-            var categories = await _categoryRepository.GetAllCategories();
-            var competition=await _eventRepository.GetEventId(competitionId);
-            var participant = _mapper.Map<Participant>(participantDto);
-
-            foreach(var category in categories)
-            {
-                if(category.Sex==participant.Sex && participant.CategoryWeight==category.Weight &&(participant.calculateAge(participant.BirthDay)>=category.GraterThanAge && participant.calculateAge(participant.BirthDay) <= category.LessThanAge))
-                {
-                    participant.Event = competition;
-                    participant.Category = category;
-                    _dataContext.Participants.Add(participant);
-                    competition.Participants.Add(participant);
-
-                }
-
-            }
-
-            await _dataContext.SaveChangesAsync();
             
+            _dataContext.Participants.Add(participant);
+            await SaveParticipant();
 
         }
 
         public async Task<IEnumerable<Participant>> GetParticipantsDataForCompetitionId(Guid competitionId)
         {
-            Event competion = await _eventRepository.GetEventId(competitionId);
-            var participants=await _dataContext.Participants.Where(elem => elem.Event == competion).ToListAsync();
+           
+            var participants=await _dataContext.Participants.Where(elem => elem.Event.Id == competitionId).ToListAsync();
             return participants;
+        }
+
+        public async Task<IEnumerable<Participant>> GetParticipantsForCategoryAndCompetition(Guid categoryId, Guid competitionId)
+        {
+            try { 
+            var participants = await _dataContext.Participants.Where(participant=>participant.Category.Id==categoryId && participant.Event.Id== competitionId).ToListAsync();
+            return  participants;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
 
         public async Task<IEnumerable<ParticipantDto>> GetParticipantsForCompetitionId(Guid competitionId)
         {
-            Event competion=await _eventRepository.GetEventId(competitionId);
-            var participants =  _dataContext.Participants.Where(elem => elem.Event == competion)
+          
+            var participants =  _dataContext.Participants.Where(elem => elem.Event.Id == competitionId)
                 .ProjectTo<ParticipantDto>(_mapper.ConfigurationProvider).ToListAsync();
                 
             return await participants;
             
+        }
+
+        public async Task SaveParticipant()
+        {
+            await _dataContext.SaveChangesAsync();
         }
     }
 }

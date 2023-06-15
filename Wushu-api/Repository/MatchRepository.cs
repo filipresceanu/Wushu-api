@@ -1,4 +1,5 @@
 ﻿using Wushu_api.Data;
+using Wushu_api.Models;
 
 namespace Wushu_api.Repository
 {
@@ -11,9 +12,10 @@ namespace Wushu_api.Repository
             _dataContext = dataContext;
         }
 
-        public Task AddParticipantsInMatch()
+        public async Task AddMatch(Match match)
         {
-            throw new NotImplementedException();
+            _dataContext.Matches.Add(match);
+            await _dataContext.SaveChangesAsync();
         }
     }
 }

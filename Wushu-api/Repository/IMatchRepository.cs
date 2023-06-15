@@ -1,7 +1,9 @@
-﻿namespace Wushu_api.Repository
+﻿using Wushu_api.Models;
+
+namespace Wushu_api.Repository
 {
     public interface IMatchRepository
     {
-        Task AddParticipantsInMatch();
+        Task AddMatch(Match match);
     }
 }
