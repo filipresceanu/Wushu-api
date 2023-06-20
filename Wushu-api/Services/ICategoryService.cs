@@ -7,5 +7,7 @@ namespace Wushu_api.Services
     {
         Task CreateCategory(CategoryDto category);
         Task<IEnumerable<CategoryDto>> GetAllCategoriesDto();
+
+        Task DeleteCategory(Guid categoryId);
     }
 }

@@ -1,9 +1,10 @@
-﻿using Wushu_api.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using Wushu_api.Data;
 using Wushu_api.Models;
 
 namespace Wushu_api.Repository
 {
-    public class MatchRepository : IMatchRepository
+    public class MatchRepository:IMatchRepository
     {
         private readonly DataContext _dataContext;
 
@@ -16,6 +17,12 @@ namespace Wushu_api.Repository
         {
             _dataContext.Matches.Add(match);
             await _dataContext.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<Match>> GetAllMatches()
+        {
+            var matches= await _dataContext.Matches.ToListAsync();
+            return matches;
         }
     }
 }

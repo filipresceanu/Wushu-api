@@ -47,5 +47,19 @@ namespace Wushu_api.Controllers
             }
             
         }
+
+        [HttpDelete("delete-category")]
+        public async Task<ActionResult>DeleteCategory(Guid categoryId)
+        {
+            try
+            {
+                await _categoryServices.DeleteCategory(categoryId);
+                return Ok("success");
+            }
+            catch
+            {
+                return BadRequest("Unable to delete category because there are some participants in this category");
+            }
+        }
     }
 }

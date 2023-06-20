@@ -1,4 +1,6 @@
-﻿namespace Wushu_api.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Wushu_api.Models
 {
     public class Event
     {
@@ -9,5 +11,7 @@
         public DateTime Date { get; set; }
 
         public ICollection<Participant> Participants { get; set; }
+
+       
     }
 }

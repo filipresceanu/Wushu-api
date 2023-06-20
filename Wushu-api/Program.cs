@@ -19,6 +19,10 @@ builder.Services.AddScoped<ICategoryService,CategoryService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IMatchRepository,MatchRepository>();
 builder.Services.AddScoped<IMatchService,MatchService>();
+builder.Services.AddScoped<IRoundRepository, RoundRepository>();
+builder.Services.AddScoped<IMatchDistributionRepository, MatchDistributionRepository>();   
+builder.Services.AddScoped<IMatchDistributionService, MatchDistribuitionService>();
+
 builder.Services.AddDbContext<DataContext>();
 
 var app = builder.Build();

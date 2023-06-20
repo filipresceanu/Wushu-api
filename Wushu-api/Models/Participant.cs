@@ -18,7 +18,7 @@ namespace Wushu_api.Models
 
         public string? Color { get; set; }
 
-        public int PointNumber { get; set; }
+       
         public Event Event { get; set; }
 
         public Category? Category { get; set; }
@@ -30,7 +30,13 @@ namespace Wushu_api.Models
             return Years;
 
         }
-      
-        public virtual ICollection<Match> Matches { get; set; }
+
+        [InverseProperty("CompetitorFirst")]
+        public  ICollection<Match> MatchesAsFirstCompetitor { get; set; }
+
+        [InverseProperty("CompetitorSecond")]
+        public ICollection<Match> MatchesAsSecondCompetitor { get; set; }
+
+        
     }
 }

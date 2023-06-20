@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Wushu_api.Data;
 
@@ -11,9 +12,11 @@ using Wushu_api.Data;
 namespace Wushu_api.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230619152300_UpdateMatches")]
+    partial class UpdateMatches
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -76,7 +79,7 @@ namespace Wushu_api.Migrations
                     b.Property<Guid>("CompetitorSecondId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("MatchDistributionsId")
+                    b.Property<Guid>("MatchDistributionsId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("dateTime")
@@ -183,7 +186,9 @@ namespace Wushu_api.Migrations
 
                     b.HasOne("Wushu_api.Models.MatchDistributions", "MatchDistributions")
                         .WithMany("Matches")
-                        .HasForeignKey("MatchDistributionsId");
+                        .HasForeignKey("MatchDistributionsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("CompetitorFirst");
 

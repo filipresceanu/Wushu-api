@@ -12,6 +12,11 @@ namespace Wushu_api.Repository
 
         Task AddParticipantInCategory(Participant participant);
 
+        Task<Category> GetCategory(Guid categoryId);
+        Task DeleteCategory(Guid categoryId);
+
+        Task EditCategory(Guid categoryId);
+
 
         //TODO edit category
         //TODO delete category

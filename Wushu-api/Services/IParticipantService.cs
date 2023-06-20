@@ -10,5 +10,9 @@ namespace Wushu_api.Services
         Task<IEnumerable<ParticipantDto>> GetParticipantsInCompetitionId(Guid competiton);
 
         Task<IEnumerable<Participant>> GetParticipantsDataInCompetitionId(Guid competiton);
+
+        Task<IEnumerable<Participant>> GetParticipantsShufflingForCategoyCompetition(Guid categoryId, Guid competitionId);
+
+        Task DeleteParticipant(Guid id);
     }
 }

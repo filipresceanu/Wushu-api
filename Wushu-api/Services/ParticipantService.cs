@@ -45,9 +45,21 @@ namespace Wushu_api.Services
             return await _participantRepository.GetParticipantsDataForCompetitionId(competiton);
         }
 
+        public async Task<IEnumerable<Participant>> GetParticipantsShufflingForCategoyCompetition(Guid categoryId, Guid competitionId)
+        {
+            var participants =await _participantRepository.GetParticipantsForCategoryAndCompetition(categoryId, competitionId);
+            var participantsShuffling = participants.OrderBy(elem => Guid.NewGuid()).ToList();
+            return participantsShuffling;
+        }
+
         public async Task<IEnumerable<ParticipantDto>> GetParticipantsInCompetitionId(Guid competiton)
         {
             return await _participantRepository.GetParticipantsForCompetitionId(competiton);
+        }
+
+        public async Task DeleteParticipant(Guid id)
+        {
+            await _participantRepository.DeleteParticipants(id);
         }
     }
 }

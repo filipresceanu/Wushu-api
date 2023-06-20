@@ -28,6 +28,26 @@ namespace Wushu_api.Repository
 
         }
 
+        public async Task DeleteParticipants(Guid participantId)
+        {
+            var participant=await GetParticipant(participantId);
+            _dataContext.Participants.Remove(participant);
+            await SaveParticipant();
+        }
+
+        public   async Task<IEnumerable<Participant>> GetParticipanstShuffling()
+        {
+            var participants=await _dataContext.Participants.OrderBy(elem=>Guid.NewGuid()).ToListAsync();
+            return participants;
+        }
+
+        public async Task<Participant> GetParticipant(Guid participantId)
+        {
+            var participant=await _dataContext.Participants.SingleOrDefaultAsync(elem=>elem.Id==participantId);
+            
+            return participant;
+        }
+
         public async Task<IEnumerable<Participant>> GetParticipantsDataForCompetitionId(Guid competitionId)
         {
            

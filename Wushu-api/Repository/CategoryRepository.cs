@@ -30,6 +30,18 @@ namespace Wushu_api.Repository
             await _dataContext.SaveChangesAsync();
         }
 
+        public async Task DeleteCategory(Guid categoryId)
+        {
+            var category=await GetCategory(categoryId);
+            _dataContext.Categories.Remove(category);
+            await _dataContext.SaveChangesAsync();
+        }
+
+        public Task EditCategory(Guid categoryId)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<IEnumerable<Category>> GetAllCategories()
         {
             var categories = _dataContext.Categories.ToListAsync();
@@ -40,6 +52,12 @@ namespace Wushu_api.Repository
         {
             var categoris = _dataContext.Categories.ProjectTo<CategoryDto>(_mapper.ConfigurationProvider).ToListAsync();
             return await categoris;
+        }
+
+        public async Task<Category> GetCategory(Guid categoryId)
+        {
+            var category= await _dataContext.Categories.SingleOrDefaultAsync(elem=>elem.Id == categoryId);
+            return category;
         }
     }
 }

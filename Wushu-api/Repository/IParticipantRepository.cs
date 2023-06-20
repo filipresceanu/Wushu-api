@@ -13,7 +13,14 @@ namespace Wushu_api.Repository
 
         Task<IEnumerable<Participant>>GetParticipantsForCategoryAndCompetition(Guid categoryId, Guid competitionId);
 
+        Task<IEnumerable<Participant>> GetParticipanstShuffling();
+
+        Task DeleteParticipants(Guid participantId);
+
+        Task<Participant> GetParticipant(Guid participantId);
+
         Task SaveParticipant();
+        
 
         //TODO edit participant
         //TODO delete participant
