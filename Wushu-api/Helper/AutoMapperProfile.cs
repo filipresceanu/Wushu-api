@@ -13,6 +13,8 @@ namespace Wushu_api.Helper
             CreateMap<ParticipantDto, Participant>();
             CreateMap<Category, CategoryDto>();
             CreateMap<CategoryDto, Category>();
+            CreateMap<AgeCategoryDto, AgeCategory>();
+            CreateMap<AgeCategory,AgeCategoryDto>();
         }
     }
 }

@@ -18,8 +18,7 @@ namespace Wushu_api.Models
 
         public string? Color { get; set; }
 
-       
-        public Event Event { get; set; }
+       public Guid CategoryId { get; set; }
 
         public Category? Category { get; set; }
 
@@ -31,12 +30,25 @@ namespace Wushu_api.Models
 
         }
 
+        public string GetAgeCategory(int age,AgeCategory ageCategory)
+        {
+            
+            if (age<= ageCategory.LessThanAge && age>= ageCategory.GraterThanAge)
+            {
+                return ageCategory.Name;
+            }
+            return null;
+        }
+
         [InverseProperty("CompetitorFirst")]
         public  ICollection<Match> MatchesAsFirstCompetitor { get; set; }
 
         [InverseProperty("CompetitorSecond")]
         public ICollection<Match> MatchesAsSecondCompetitor { get; set; }
 
-        
+        [InverseProperty("ParticipantWinner")]
+        public ICollection<Match> MatchesAsWinner { get; set; }
+
+
     }
 }

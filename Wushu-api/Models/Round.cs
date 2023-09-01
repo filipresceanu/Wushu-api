@@ -8,7 +8,7 @@ namespace Wushu_api.Models
         [Key]
         public Guid Id { get; set; }
 
-        
+        public Guid MatchId { get; set; }
 
         public Match Match { get; set; }
 
@@ -16,8 +16,10 @@ namespace Wushu_api.Models
 
         public int PointParticipantSecond { get; set; }
 
-       
+        public Guid? ParticipantWinnerId { get; set; }
 
+        [ForeignKey("ParticipantWinnerId")]
+        public Participant? ParticipantWinner { get; set; }
 
     }
 }

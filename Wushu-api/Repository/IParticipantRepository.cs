@@ -5,7 +5,7 @@ namespace Wushu_api.Repository
 {
     public interface IParticipantRepository
     {
-        Task AddParticipantsInCompetition(Guid competitionId, Participant participant);
+        Task AddParticipantsInCompetition(Participant participant);
 
         Task<IEnumerable<ParticipantDto>> GetParticipantsForCompetitionId(Guid competitionId);
 
@@ -19,8 +19,13 @@ namespace Wushu_api.Repository
 
         Task<Participant> GetParticipant(Guid participantId);
 
+        Task<string> GetParticipantName(Guid participantId);
+
         Task SaveParticipant();
-        
+
+        Task<int> GetParticipantNumberForCategoryAndCompetition(Guid categoryId, Guid competitionId);
+
+        Task<ParticipantDto> GetParticipantDto(Guid participantId);
 
         //TODO edit participant
         //TODO delete participant

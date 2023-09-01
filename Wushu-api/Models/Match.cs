@@ -18,8 +18,22 @@ namespace Wushu_api.Models
 
         [ForeignKey("CompetitorSecondId")]
         public Participant CompetitorSecond { get; set; }
+
+        public Guid? ParticipantWinnerId { get; set; }
+
+        [ForeignKey("ParticipantWinnerId")]
+        public Participant? ParticipantWinner { get; set; }
         public ICollection<Round>Rounds { get; set; }
 
-        public MatchDistributions? MatchDistributions { get; set; }
+        [ForeignKey("UserId")]
+
+        public User? User { get; set; }
+
+        public string UserId { get; set; }
+
+
+
+
+
     }
 }

@@ -6,24 +6,22 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Wushu_api.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateMatches : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Categories",
+                name: "AgeCategories",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Sex = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Weight = table.Column<int>(type: "int", nullable: false),
                     LessThanAge = table.Column<int>(type: "int", nullable: false),
                     GraterThanAge = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Categories", x => x.Id);
+                    table.PrimaryKey("PK_AgeCategories", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -40,14 +38,30 @@ namespace Wushu_api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MatchDistributions",
+                name: "Categories",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Sex = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Weight = table.Column<int>(type: "int", nullable: false),
+                    EventId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AgeCategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MatchDistributions", x => x.Id);
+                    table.PrimaryKey("PK_Categories", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Categories_AgeCategories_AgeCategoryId",
+                        column: x => x.AgeCategoryId,
+                        principalTable: "AgeCategories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Categories_Events_EventId",
+                        column: x => x.EventId,
+                        principalTable: "Events",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -61,7 +75,6 @@ namespace Wushu_api.Migrations
                     Sex = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CategoryWeight = table.Column<int>(type: "int", nullable: false),
                     Color = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    EventId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
@@ -72,12 +85,6 @@ namespace Wushu_api.Migrations
                         column: x => x.CategoryId,
                         principalTable: "Categories",
                         principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Participants_Events_EventId",
-                        column: x => x.EventId,
-                        principalTable: "Events",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -87,18 +94,11 @@ namespace Wushu_api.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     dateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CompetitorFirstId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CompetitorSecondId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    MatchDistributionsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    CompetitorSecondId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Matches", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Matches_MatchDistributions_MatchDistributionsId",
-                        column: x => x.MatchDistributionsId,
-                        principalTable: "MatchDistributions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Matches_Participants_CompetitorFirstId",
                         column: x => x.CompetitorFirstId,
@@ -134,6 +134,16 @@ namespace Wushu_api.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Categories_AgeCategoryId",
+                table: "Categories",
+                column: "AgeCategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Categories_EventId",
+                table: "Categories",
+                column: "EventId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Matches_CompetitorFirstId",
                 table: "Matches",
                 column: "CompetitorFirstId");
@@ -144,19 +154,9 @@ namespace Wushu_api.Migrations
                 column: "CompetitorSecondId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Matches_MatchDistributionsId",
-                table: "Matches",
-                column: "MatchDistributionsId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Participants_CategoryId",
                 table: "Participants",
                 column: "CategoryId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Participants_EventId",
-                table: "Participants",
-                column: "EventId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Rounds_MatchId",
@@ -174,13 +174,13 @@ namespace Wushu_api.Migrations
                 name: "Matches");
 
             migrationBuilder.DropTable(
-                name: "MatchDistributions");
-
-            migrationBuilder.DropTable(
                 name: "Participants");
 
             migrationBuilder.DropTable(
                 name: "Categories");
+
+            migrationBuilder.DropTable(
+                name: "AgeCategories");
 
             migrationBuilder.DropTable(
                 name: "Events");

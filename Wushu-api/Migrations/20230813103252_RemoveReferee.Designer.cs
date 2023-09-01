@@ -12,20 +12,20 @@ using Wushu_api.Data;
 namespace Wushu_api.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230620061523_UpdateMatchDistribution")]
-    partial class UpdateMatchDistribution
+    [Migration("20230813103252_RemoveReferee")]
+    partial class RemoveReferee
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.5")
+                .HasAnnotation("ProductVersion", "7.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Wushu_api.Models.Category", b =>
+            modelBuilder.Entity("Wushu_api.Models.AgeCategory", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -37,14 +37,42 @@ namespace Wushu_api.Migrations
                     b.Property<int>("LessThanAge")
                         .HasColumnType("int");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AgeCategories");
+                });
+
+            modelBuilder.Entity("Wushu_api.Models.Category", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AgeCategoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("GraterThanWeight")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LessThanWeight")
+                        .HasColumnType("int");
+
                     b.Property<string>("Sex")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Weight")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("AgeCategoryId");
+
+                    b.HasIndex("EventId");
 
                     b.ToTable("Categories");
                 });
@@ -73,13 +101,13 @@ namespace Wushu_api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CompetitorFirstId")
+                    b.Property<Guid?>("CompetitorFirstId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CompetitorSecondId")
+                    b.Property<Guid?>("CompetitorSecondId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("MatchDistributionsId")
+                    b.Property<Guid?>("ParticipantWinnerId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("dateTime")
@@ -91,20 +119,9 @@ namespace Wushu_api.Migrations
 
                     b.HasIndex("CompetitorSecondId");
 
-                    b.HasIndex("MatchDistributionsId");
+                    b.HasIndex("ParticipantWinnerId");
 
                     b.ToTable("Matches");
-                });
-
-            modelBuilder.Entity("Wushu_api.Models.MatchDistributions", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MatchDistributions");
                 });
 
             modelBuilder.Entity("Wushu_api.Models.Participant", b =>
@@ -116,7 +133,7 @@ namespace Wushu_api.Migrations
                     b.Property<DateTime>("BirthDay")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("CategoryId")
+                    b.Property<Guid>("CategoryId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("CategoryWeight")
@@ -129,9 +146,6 @@ namespace Wushu_api.Migrations
                     b.Property<string>("Color")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("EventId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -142,8 +156,6 @@ namespace Wushu_api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
-
-                    b.HasIndex("EventId");
 
                     b.ToTable("Participants");
                 });
@@ -170,46 +182,58 @@ namespace Wushu_api.Migrations
                     b.ToTable("Rounds");
                 });
 
+            modelBuilder.Entity("Wushu_api.Models.Category", b =>
+                {
+                    b.HasOne("Wushu_api.Models.AgeCategory", "AgeCategory")
+                        .WithMany("Categories")
+                        .HasForeignKey("AgeCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Wushu_api.Models.Event", "Event")
+                        .WithMany("Categories")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AgeCategory");
+
+                    b.Navigation("Event");
+                });
+
             modelBuilder.Entity("Wushu_api.Models.Match", b =>
                 {
                     b.HasOne("Wushu_api.Models.Participant", "CompetitorFirst")
                         .WithMany("MatchesAsFirstCompetitor")
                         .HasForeignKey("CompetitorFirstId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Wushu_api.Models.Participant", "CompetitorSecond")
                         .WithMany("MatchesAsSecondCompetitor")
                         .HasForeignKey("CompetitorSecondId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("Wushu_api.Models.MatchDistributions", "MatchDistributions")
-                        .WithMany("Matches")
-                        .HasForeignKey("MatchDistributionsId");
+                    b.HasOne("Wushu_api.Models.Participant", "ParticipantWinner")
+                        .WithMany("MatchesAsWinner")
+                        .HasForeignKey("ParticipantWinnerId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("CompetitorFirst");
 
                     b.Navigation("CompetitorSecond");
 
-                    b.Navigation("MatchDistributions");
+                    b.Navigation("ParticipantWinner");
                 });
 
             modelBuilder.Entity("Wushu_api.Models.Participant", b =>
                 {
                     b.HasOne("Wushu_api.Models.Category", "Category")
                         .WithMany("Participants")
-                        .HasForeignKey("CategoryId");
-
-                    b.HasOne("Wushu_api.Models.Event", "Event")
-                        .WithMany("Participants")
-                        .HasForeignKey("EventId")
+                        .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Category");
-
-                    b.Navigation("Event");
                 });
 
             modelBuilder.Entity("Wushu_api.Models.Round", b =>
@@ -223,6 +247,11 @@ namespace Wushu_api.Migrations
                     b.Navigation("Match");
                 });
 
+            modelBuilder.Entity("Wushu_api.Models.AgeCategory", b =>
+                {
+                    b.Navigation("Categories");
+                });
+
             modelBuilder.Entity("Wushu_api.Models.Category", b =>
                 {
                     b.Navigation("Participants");
@@ -230,7 +259,7 @@ namespace Wushu_api.Migrations
 
             modelBuilder.Entity("Wushu_api.Models.Event", b =>
                 {
-                    b.Navigation("Participants");
+                    b.Navigation("Categories");
                 });
 
             modelBuilder.Entity("Wushu_api.Models.Match", b =>
@@ -238,16 +267,13 @@ namespace Wushu_api.Migrations
                     b.Navigation("Rounds");
                 });
 
-            modelBuilder.Entity("Wushu_api.Models.MatchDistributions", b =>
-                {
-                    b.Navigation("Matches");
-                });
-
             modelBuilder.Entity("Wushu_api.Models.Participant", b =>
                 {
                     b.Navigation("MatchesAsFirstCompetitor");
 
                     b.Navigation("MatchesAsSecondCompetitor");
+
+                    b.Navigation("MatchesAsWinner");
                 });
 #pragma warning restore 612, 618
         }

@@ -27,11 +27,11 @@ namespace Wushu_api.Controllers
         [HttpPut("add-event")]
         public async Task<ActionResult>AddEvent(EventDto competition)
         {
-            var _competition=new Event{
-                
-                Name=competition.Name,
-                Date= competition.Date,
-                Participants=new Collection<Participant>()
+            var _competition = new Event {
+
+                Name = competition.Name,
+                Date = competition.Date,
+                Categories = new Collection<Category>()
 
                  };
 
@@ -46,9 +46,15 @@ namespace Wushu_api.Controllers
         }
 
         [HttpPut("add-in-competition/{id}")]
-        public async Task<ActionResult>AddParticipantsInCompetition(Guid id,ParticipantDto participantDto)
+        public async Task<ActionResult>AddParticipantsInCompetition(Guid id,
+            ParticipantDto participantDto)
         {
-            await _participantService.AddParticipantsInCompetition(id,participantDto);
+            string result=await _participantService.AddParticipantsInCompetition(id,
+                participantDto);
+            if(string.IsNullOrEmpty(result))
+            {
+                return BadRequest("There is no category for this participant");
+            }
             return Ok("success");
         }
 

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Azure;
 using Wushu_api.Data;
 using Wushu_api.Dto;
 using Wushu_api.Models;
@@ -11,34 +12,60 @@ namespace Wushu_api.Services
         private readonly IParticipantRepository _participantRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IEventRepository _eventRepository;
+        private readonly IAgeCategoryRepository _ageCategoryRepository;
         private readonly IMapper _mapper;
 
-        public ParticipantService(IParticipantRepository participantRepository, ICategoryRepository categoryRepository, IEventRepository eventRepository, IMapper mapper = null)
+        public ParticipantService(IParticipantRepository participantRepository, ICategoryRepository categoryRepository, IEventRepository eventRepository, IMapper mapper, IAgeCategoryRepository ageCategoryRepository)
         {
             _participantRepository = participantRepository;
             _categoryRepository = categoryRepository;
             _eventRepository = eventRepository;
             _mapper = mapper;
+            _ageCategoryRepository = ageCategoryRepository;
         }
 
-        public async Task AddParticipantsInCompetition(Guid eventId, ParticipantDto participantDto)
+        public async Task<string> AddParticipantsInCompetition(Guid eventId,
+            ParticipantDto participantDto)
         {
+            string response = string.Empty;
             var categories = await _categoryRepository.GetAllCategories();
-            var competition = await _eventRepository.GetEventId(eventId);
             var participant = _mapper.Map<Participant>(participantDto);
 
             foreach (var category in categories)
             {
-                if (category.Sex == participant.Sex && participant.CategoryWeight == category.Weight && (participant.calculateAge(participant.BirthDay) >= category.GraterThanAge && participant.calculateAge(participant.BirthDay) <= category.LessThanAge))
-                {
-                    participant.Event = competition;
-                    participant.Category = category;
-                    await _participantRepository.AddParticipantsInCompetition(eventId, participant);
-                }
+                    if(await CheckParticipantCategory(participant,category))                
+                    {
+                        participant.Category=category;
+                         await _participantRepository.AddParticipantsInCompetition(participant);
+                        response = "Succesfull added in competition";
+                        break;
+                    }
             }
-            
-
+            return response;
         }
+
+        private async Task<bool> CheckParticipantCategory(Participant participant,Category category)
+        {
+
+            var ageCat = await _ageCategoryRepository.GetAgeCategoryById(category.AgeCategoryId);
+            int participantAge = participant.calculateAge(participant.BirthDay);
+            string categoryAge = participant.GetAgeCategory(participantAge, ageCat);
+            int participantWeight = participant.CategoryWeight;
+            int categoryGraterWeight = category.GraterThanWeight;
+            int categoryLessWeight=category.LessThanWeight;
+
+
+            if (!string.IsNullOrEmpty(categoryAge) && category.Sex == participant.Sex 
+                && participantWeight>categoryGraterWeight && participantWeight<=categoryLessWeight)
+            {
+                return true;
+                
+            }
+           
+            return false;
+        }
+
+
 
         public async Task<IEnumerable<Participant>> GetParticipantsDataInCompetitionId(Guid competiton)
         {

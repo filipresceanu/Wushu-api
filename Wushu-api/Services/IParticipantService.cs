@@ -5,7 +5,7 @@ namespace Wushu_api.Services
 {
     public interface IParticipantService
     {
-        Task AddParticipantsInCompetition(Guid competitionId, ParticipantDto participantDto);
+        Task<string> AddParticipantsInCompetition(Guid competitionId, ParticipantDto participantDto);
 
         Task<IEnumerable<ParticipantDto>> GetParticipantsInCompetitionId(Guid competiton);
 

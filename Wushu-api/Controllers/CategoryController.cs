@@ -18,12 +18,14 @@ namespace Wushu_api.Controllers
             _categoryServices = categoryServices;
         }
 
-        [HttpPut("create-category")]
-        public async Task<ActionResult> AddEvent(CategoryDto categoryDto)
+        [HttpPut("create-category/{eventId}/{categoryAgeId}")]
+        public async Task<ActionResult> AddEvent(CategoryDto categoryDto
+            ,Guid eventId, Guid categoryAgeId)
         {
             try
             {
-                await _categoryServices.CreateCategory(categoryDto);
+                await _categoryServices.CreateCategory(categoryDto
+                    ,eventId,categoryAgeId);
 
             }
             catch (Exception ex)
@@ -59,6 +61,20 @@ namespace Wushu_api.Controllers
             catch
             {
                 return BadRequest("Unable to delete category because there are some participants in this category");
+            }
+        }
+
+        [HttpGet("get-category/{eventId}")]
+        public async Task<ActionResult<IEnumerable<CategoryDataDto>>> GetCategoryData(Guid eventId)
+        {
+            try
+            {
+                var categories=await _categoryServices.GetCategoryData(eventId);
+                return Ok(categories);
+            }
+            catch(Exception e) 
+            {
+                return BadRequest(e.Message);
             }
         }
     }

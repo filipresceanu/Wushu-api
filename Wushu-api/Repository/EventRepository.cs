@@ -33,7 +33,8 @@ namespace Wushu_api.Repository
 
         public async Task<IEnumerable<EventDto>> GetAllEvents()
         {
-            var events= _dataContext.Events.ProjectTo<EventDto>(_mapper.ConfigurationProvider).ToListAsync();           
+            var events= _dataContext.Events.ProjectTo<EventDto>
+                (_mapper.ConfigurationProvider).ToListAsync();           
             return await events;
         }
 

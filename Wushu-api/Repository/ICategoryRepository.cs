@@ -5,7 +5,7 @@ namespace Wushu_api.Repository
 {
     public interface ICategoryRepository
     {
-        Task CreateCategory(CategoryDto categorydto);
+        Task CreateCategory(Category category);
         Task<IEnumerable<CategoryDto>> GetAllCategoriesDto();
 
         Task<IEnumerable<Category>> GetAllCategories();
@@ -17,6 +17,7 @@ namespace Wushu_api.Repository
 
         Task EditCategory(Guid categoryId);
 
+        Task<IEnumerable<Category>>GetCategorieForEventId(Guid eventId);
 
         //TODO edit category
         //TODO delete category

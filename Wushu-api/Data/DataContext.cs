@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Wushu_api.Models;
 
 namespace Wushu_api.Data
 {
-    public class DataContext:DbContext
+    public class DataContext: IdentityDbContext<User>
     {
         public DataContext(DbContextOptions<DataContext> options) : base(options) 
         {
@@ -23,7 +25,7 @@ namespace Wushu_api.Data
 
         public DbSet<Round> Rounds { get; set; }
 
-        public DbSet<MatchDistributions> MatchDistributions { get; set; }
+        public DbSet<AgeCategory> AgeCategories { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -39,6 +41,21 @@ namespace Wushu_api.Data
                 .WithMany(p => p.MatchesAsSecondCompetitor)
                 .HasForeignKey(m => m.CompetitorSecondId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Match>()
+                .HasOne(m => m.ParticipantWinner)
+                .WithMany(p => p.MatchesAsWinner)
+                .HasForeignKey(m => m.ParticipantWinnerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<IdentityRole>()
+                .HasData(
+                    new IdentityRole { Name = "Referee", NormalizedName = "REFEREE" },
+                    new IdentityRole { Name = "Admin", NormalizedName = "ADMIN" }
+                );
         }
        
 

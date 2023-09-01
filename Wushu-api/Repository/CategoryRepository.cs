@@ -23,11 +23,11 @@ namespace Wushu_api.Repository
             throw new NotImplementedException();
         }
 
-        public async Task CreateCategory(CategoryDto categorydto)
+        public async Task CreateCategory(Category category)
         {
-            var category = _mapper.Map<Category>(categorydto);
             _dataContext.Categories.Add(category);
             await _dataContext.SaveChangesAsync();
+           
         }
 
         public async Task DeleteCategory(Guid categoryId)
@@ -54,10 +54,23 @@ namespace Wushu_api.Repository
             return await categoris;
         }
 
+        public async Task<IEnumerable<Category>> GetCategorieForEventId(Guid eventId)
+        {
+            var categories=await _dataContext.Categories.Where(elem=>elem.EventId == eventId).ToListAsync();
+            return categories;
+        }
+
         public async Task<Category> GetCategory(Guid categoryId)
         {
             var category= await _dataContext.Categories.SingleOrDefaultAsync(elem=>elem.Id == categoryId);
             return category;
         }
+
+        //public async Task<Category> GetCategoryss(Guid categoryId)
+        //{
+        //    var participants=await _dataContext.Participants.Where(element => element.CategoryId)
+        //    var category = await _dataContext.Categories.Where(element=>element.Pa)
+        //    return category;
+        //}
     }
 }

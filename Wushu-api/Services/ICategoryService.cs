@@ -5,9 +5,11 @@ namespace Wushu_api.Services
 {
     public interface ICategoryService
     {
-        Task CreateCategory(CategoryDto category);
+        Task CreateCategory(CategoryDto categoryDto,Guid eventId,Guid categoryAgeId);
         Task<IEnumerable<CategoryDto>> GetAllCategoriesDto();
 
         Task DeleteCategory(Guid categoryId);
+
+        Task<IEnumerable<CategoryDataDto>> GetCategoryData(Guid eventId);
     }
 }

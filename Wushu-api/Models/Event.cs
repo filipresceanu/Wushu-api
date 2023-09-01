@@ -10,7 +10,7 @@ namespace Wushu_api.Models
 
         public DateTime Date { get; set; }
 
-        public ICollection<Participant> Participants { get; set; }
+        public ICollection<Category> Categories { get; set; }
 
        
     }
