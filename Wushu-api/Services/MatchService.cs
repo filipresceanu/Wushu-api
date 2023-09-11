@@ -21,10 +21,11 @@ namespace Wushu_api.Services
         private readonly IParticipantService _participantService;
         private readonly IRoundRepository _roundRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IAgeCategoryRepository _ageCategoryRepository;
 
         public MatchService(ICategoryRepository categoryRepository,
             IParticipantRepository participantRepository, IMatchRepository matchRepository,
-            IParticipantService participantService, IRoundRepository roundRepository, IUserRepository userRepository)
+            IParticipantService participantService, IRoundRepository roundRepository, IUserRepository userRepository, IAgeCategoryRepository ageCategoryRepository)
         {
 
             _categoryRepository = categoryRepository;
@@ -33,6 +34,7 @@ namespace Wushu_api.Services
             _participantService = participantService;
             _roundRepository = roundRepository;
             _userRepository = userRepository;
+            _ageCategoryRepository = ageCategoryRepository;
         }
         private async Task AddRoundInMatches(Match match)
         {
@@ -54,8 +56,10 @@ namespace Wushu_api.Services
                 {
                     Match match = new Match();
                     match.CompetitorFirst = participants.ElementAt(index);
+                    match.CompetitorFirstId = participants.ElementAt(index).Id;
                     index++;
                     match.CompetitorSecond = participants.ElementAt(index);
+                    match.CompetitorSecondId=participants.ElementAt(index).Id;
                     await _matchRepository.AddMatch(match);
                     await AddRoundInMatches(match);
                     latest = index;
@@ -212,5 +216,47 @@ namespace Wushu_api.Services
             return participantDto;
         }
 
+        public async Task<IEnumerable<CategoryMatchDto>>GetMatchesCategory(Guid eventId)
+        {
+            var categories = await _categoryRepository.GetCategorieForEventId(eventId);
+            List<CategoryMatchDto>categoryMatchDtos=new List<CategoryMatchDto>();
+            foreach (var category in categories)
+            {
+                var ageCategory = await _ageCategoryRepository.GetAgeCategoryById(category.AgeCategoryId);
+                CategoryMatchDto categoryMatchDto=new CategoryMatchDto();
+                categoryMatchDto.LessThanWeight=category.LessThanWeight;
+                categoryMatchDto.GraterThanWeight=category.GraterThanWeight;
+                categoryMatchDto.Seniority = ageCategory.Name;
+                categoryMatchDto.Sex=category.Sex;
+                List<MatchDto> matchesDto = new List<MatchDto>();
+                var matches=await _matchRepository.GetMatchesCategory(category.Id);
+                int matchNumber = 1;
+                foreach (var match in matches)
+                {
+                    MatchDto matchDto=new MatchDto();
+                    var participantFirst = await _participantRepository.GetParticipant(match.CompetitorFirstId);
+                    matchDto.ParticipantFirstName = participantFirst.Name;
+                    matchDto.FirstParticipantWeight = participantFirst.CategoryWeight;
+                    var participantSecond = await _participantRepository.GetParticipant(match.CompetitorSecondId);
+                    matchDto.ParticipantSecondName = participantSecond.Name;
+                    matchDto.SecondParticipantWeight = participantSecond.CategoryWeight;
+                    matchDto.MatchNumber= matchNumber;
+                    if(match.ParticipantWinnerId==null)
+                    {
+                        matchDto.WinnerMatch = "----";
+                    }
+                    else
+                    {
+                        var participantWinner = await _participantRepository.GetParticipant((Guid)match.ParticipantWinnerId);
+                        matchDto.WinnerMatch=participantWinner.Name;
+                    }
+                    matchesDto.Add(matchDto);
+                    matchNumber++;
+                }
+                categoryMatchDto.Matches = matchesDto;
+                categoryMatchDtos.Add(categoryMatchDto);
+            }
+            return categoryMatchDtos;
+        }
     }
 }

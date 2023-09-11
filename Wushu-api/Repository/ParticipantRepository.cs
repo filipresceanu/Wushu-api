@@ -65,9 +65,8 @@ namespace Wushu_api.Repository
         public async Task<IEnumerable<Participant>> GetParticipantsForCategoryAndCompetition(Guid categoryId, Guid competitionId)
         {
             try { 
-            var participants = await _dataContext.Participants.Where(participant=>participant.Category.Id==categoryId && participant.Category.Event.Id== competitionId).ToListAsync();
-            
-            return  participants;
+                var participants = await _dataContext.Participants.Where(participant=>participant.Category.Id==categoryId && participant.Category.Event.Id== competitionId).ToListAsync();
+                return  participants;
             }
             catch (Exception ex)
             {

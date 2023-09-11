@@ -21,12 +21,12 @@ namespace Wushu_api.Controllers
         }
 
 
-        [HttpPut("Generate-Matches")]
-        public async Task<ActionResult>Generatematches(Guid id)
+        [HttpPut("Generate-Matches/{eventId}")]
+        public async Task<ActionResult>Generatematches(Guid eventId)
         {
             try
             {
-                await _matchService.GenerateMatches(id);
+                await _matchService.GenerateMatches(eventId);
                 return Ok("success");
             }
             catch (Exception ex)
@@ -35,7 +35,7 @@ namespace Wushu_api.Controllers
             }
         }
 
-        [HttpPut("Distribute_Referee")]
+        [HttpPut("Distribute_Referee/{eventId}")]
         public async Task<ActionResult> DistributeReferee(Guid eventId)
         {
             try
@@ -62,6 +62,20 @@ namespace Wushu_api.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [HttpGet("GetMatchesForEvent/{eventId}")]
+        public async Task<ActionResult<IEnumerable<CategoryMatchDto>>>GetMatchesDto(Guid eventId)
+        {
+            try
+            {
+                var categoryMatches=await _matchService.GetMatchesCategory(eventId);
+                return Ok(categoryMatches);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
 
         [HttpPut("AddPointsRound/{roundId}")]
         public async Task<ActionResult> AddPointsInRound(Guid roundId, PointsDto points)
@@ -118,7 +132,6 @@ namespace Wushu_api.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
 
     }
 }

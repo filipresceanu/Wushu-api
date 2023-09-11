@@ -19,5 +19,7 @@ namespace Wushu_api.Services
 
 
         Task<ParticipantDto> GetParticipantWinner(Guid matchId);
+
+        Task<IEnumerable<CategoryMatchDto>> GetMatchesCategory(Guid eventId);
     }
 }
