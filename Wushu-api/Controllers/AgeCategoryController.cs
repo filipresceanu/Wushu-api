@@ -22,8 +22,8 @@ namespace Wushu_api.Controllers
         {
             try
             {
-            await _ageCategoryService.CreateAgeCategory(ageCategory);
-            return Ok("success");
+                await _ageCategoryService.CreateAgeCategory(ageCategory);
+                return Ok("success");
 
             }
             catch (Exception ex)
@@ -33,14 +33,15 @@ namespace Wushu_api.Controllers
         }
 
         [HttpGet("get-all-age-categories")]
-        public async Task<ActionResult<IEnumerable<AgeCategoryDto>>> GetAgeCategories() 
+        public async Task<ActionResult<IEnumerable<AgeCategoryDto>>> GetAgeCategories()
         {
             try
             {
-                var ageCategories=await _ageCategoryService.GetAgeCategories();
+                var ageCategories = await _ageCategoryService.GetAgeCategories();
                 return Ok(ageCategories);
 
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 return BadRequest(ex);
             }
@@ -48,14 +49,15 @@ namespace Wushu_api.Controllers
 
         [HttpGet("get-age-categoty-id/{ageCategoryId}")]
 
-        public async Task<ActionResult<AgeCategory>>GetAgeCategory(Guid ageCategoryId)
+        public async Task<ActionResult<AgeCategory>> GetAgeCategory(Guid ageCategoryId)
         {
             try
             {
-                var ageCategory=await _ageCategoryService.GetAgeCategoryById(ageCategoryId);
+                var ageCategory = await _ageCategoryService.GetAgeCategoryById(ageCategoryId);
                 return Ok(ageCategory);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 return BadRequest(ex);
             }
         }

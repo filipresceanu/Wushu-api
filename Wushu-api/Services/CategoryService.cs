@@ -20,7 +20,7 @@ namespace Wushu_api.Services
             _ageCategoryRepository = ageCategoryRepository;
         }
 
-        public  async Task CreateCategory(CategoryDto categoryDto,
+        public async Task CreateCategory(CategoryDto categoryDto,
             Guid eventId,Guid categoryAgeId)
         {
             var eventCategory=await _eventRepository.GetEventId(eventId);
