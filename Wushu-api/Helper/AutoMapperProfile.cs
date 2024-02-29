@@ -8,7 +8,7 @@ namespace Wushu_api.Helper
     {
         public AutoMapperProfile()
         {
-            CreateMap<Event, EventDto>();
+            CreateMap<Competition, CompetitionDto>();
             CreateMap<Participant, ParticipantDto>();
             CreateMap<ParticipantDto, Participant>();
             CreateMap<Category, CategoryDto>();

@@ -12,11 +12,13 @@ namespace Wushu_api.Repository
         private readonly DataContext _dataContext;
         private readonly IMapper _mapper;
 
-        public CategoryRepository(DataContext dataContext,IMapper mapper)
+        public CategoryRepository(DataContext dataContext, IMapper mapper)
         {
             _dataContext = dataContext;
             _mapper = mapper;
         }
+
+       
 
         public Task AddParticipantInCategory(Participant participant)
         {
@@ -27,12 +29,12 @@ namespace Wushu_api.Repository
         {
             _dataContext.Categories.Add(category);
             await _dataContext.SaveChangesAsync();
-           
+
         }
 
         public async Task DeleteCategory(Guid categoryId)
         {
-            var category=await GetCategory(categoryId);
+            var category = await GetCategory(categoryId);
             _dataContext.Categories.Remove(category);
             await _dataContext.SaveChangesAsync();
         }
@@ -54,15 +56,15 @@ namespace Wushu_api.Repository
             return await categoris;
         }
 
-        public async Task<IEnumerable<Category>> GetCategorieForEventId(Guid eventId)
+        public async Task<IEnumerable<Category>> GetCategorieForCompetitionId(Guid competitionId)
         {
-            var categories=await _dataContext.Categories.Where(elem=>elem.EventId == eventId).ToListAsync();
+            var categories = await _dataContext.Categories.Where(elem => elem.CompetitionId == competitionId).ToListAsync();
             return categories;
         }
 
         public async Task<Category> GetCategory(Guid categoryId)
         {
-            var category= await _dataContext.Categories.SingleOrDefaultAsync(elem=>elem.Id == categoryId);
+            var category = await _dataContext.Categories.SingleOrDefaultAsync(elem => elem.Id == categoryId);
             return category;
         }
 

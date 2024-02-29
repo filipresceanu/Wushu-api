@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Azure;
 using Wushu_api.Data;
 using Wushu_api.Dto;
 using Wushu_api.Models;
@@ -7,15 +6,15 @@ using Wushu_api.Repository;
 
 namespace Wushu_api.Services
 {
-    public class ParticipantService:IParticipantService
+    public class ParticipantService : IParticipantService
     {
         private readonly IParticipantRepository _participantRepository;
         private readonly ICategoryRepository _categoryRepository;
-        private readonly IEventRepository _eventRepository;
+        private readonly ICompetitionRepository _eventRepository;
         private readonly IAgeCategoryRepository _ageCategoryRepository;
         private readonly IMapper _mapper;
 
-        public ParticipantService(IParticipantRepository participantRepository, ICategoryRepository categoryRepository, IEventRepository eventRepository, IMapper mapper, IAgeCategoryRepository ageCategoryRepository)
+        public ParticipantService(IParticipantRepository participantRepository, ICategoryRepository categoryRepository, ICompetitionRepository eventRepository, IMapper mapper, IAgeCategoryRepository ageCategoryRepository)
         {
             _participantRepository = participantRepository;
             _categoryRepository = categoryRepository;
@@ -24,7 +23,7 @@ namespace Wushu_api.Services
             _ageCategoryRepository = ageCategoryRepository;
         }
 
-        public async Task<string> AddParticipantsInCompetition(Guid eventId,
+        public async Task<string> AddParticipantsInCompetition(Guid competitionId,
             ParticipantDto participantDto)
         {
             string response = string.Empty;
@@ -33,55 +32,57 @@ namespace Wushu_api.Services
 
             foreach (var category in categories)
             {
-                    if(await CheckParticipantCategory(participant,category))                
-                    {
-                        participant.Category=category;
-                         await _participantRepository.AddParticipantsInCompetition(participant);
-                        response = "Succesfull added in competition";
-                        break;
-                    }
+                if (await CheckParticipantCategory(participant, category))
+                {
+                    participant.Category = category;
+                    await _participantRepository.AddParticipantsInCompetition(participant);
+                    response = "Succesfull added in competition";
+                    break;
+                }
             }
             return response;
         }
 
-        private async Task<bool> CheckParticipantCategory(Participant participant,Category category)
+        private async Task<bool> CheckParticipantCategory(Participant participant, Category category)
         {
-
             var ageCat = await _ageCategoryRepository.GetAgeCategoryById(category.AgeCategoryId);
             int participantAge = participant.calculateAge(participant.BirthDay);
             string categoryAge = participant.GetAgeCategory(participantAge, ageCat);
             int participantWeight = participant.CategoryWeight;
             int categoryGraterWeight = category.GraterThanWeight;
-            int categoryLessWeight=category.LessThanWeight;
+            int categoryLessWeight = category.LessThanWeight;
 
-
-            if (!string.IsNullOrEmpty(categoryAge) && category.Sex == participant.Sex 
-                && participantWeight>categoryGraterWeight && participantWeight<=categoryLessWeight)
+            if (!string.IsNullOrEmpty(categoryAge) && category.Sex == participant.Sex
+                && participantWeight > categoryGraterWeight && participantWeight <= categoryLessWeight)
             {
                 return true;
-                
+
             }
-           
+
             return false;
         }
-
-
 
         public async Task<IEnumerable<Participant>> GetParticipantsDataInCompetitionId(Guid competiton)
         {
             return await _participantRepository.GetParticipantsDataForCompetitionId(competiton);
         }
 
-        public async Task<IEnumerable<Participant>> GetParticipantsShufflingForCategoyCompetition(Guid categoryId, Guid competitionId)
+        public async Task<IEnumerable<Participant>> GetParticipantsRandomCategoyAndCompetition(Guid categoryId, Guid competitionId)
         {
-            var participants =await _participantRepository.GetParticipantsForCategoryAndCompetition(categoryId, competitionId);
-            var participantsShuffling = participants.OrderBy(elem => Guid.NewGuid()).ToList();
-            return participantsShuffling;
+            var participants = await _participantRepository.GetParticipantsForCategoryAndCompetition(categoryId, competitionId);
+            var participantsRandom = ShufflingParticipants(participants);
+            return participantsRandom;
         }
 
-        public async Task<IEnumerable<ParticipantDto>> GetParticipantsInCompetitionId(Guid competiton)
+        public IEnumerable<Participant> ShufflingParticipants(IEnumerable<Participant> participants)
         {
-            return await _participantRepository.GetParticipantsForCompetitionId(competiton);
+            var participantsRandom = participants.OrderBy(elem => Guid.NewGuid()).ToList();
+            return participantsRandom;
+        }
+
+        public async Task<IEnumerable<ParticipantDto>> GetParticipantsInCompetitionId(Guid competitionId)
+        {
+            return await _participantRepository.GetParticipantsForCompetitionId(competitionId);
         }
 
         public async Task DeleteParticipant(Guid id)

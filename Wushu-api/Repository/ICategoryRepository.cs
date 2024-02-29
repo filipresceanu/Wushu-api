@@ -17,7 +17,7 @@ namespace Wushu_api.Repository
 
         Task EditCategory(Guid categoryId);
 
-        Task<IEnumerable<Category>>GetCategorieForEventId(Guid eventId);
+        Task<IEnumerable<Category>>GetCategorieForCompetitionId(Guid competitionId);
 
         //TODO edit category
         //TODO delete category

@@ -16,10 +16,10 @@ namespace Wushu_api.Models
 
         public int PointParticipantSecond { get; set; }
 
-        public Guid? ParticipantWinnerId { get; set; }
+        public Guid ParticipantWinnerId { get; set; }
 
         [ForeignKey("ParticipantWinnerId")]
-        public Participant? ParticipantWinner { get; set; }
+        public Participant ParticipantWinner { get; set; }
 
     }
 }

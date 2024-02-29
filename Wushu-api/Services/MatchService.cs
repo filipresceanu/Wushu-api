@@ -1,262 +1,78 @@
-﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using Microsoft.Extensions.Logging;
-using System.Runtime.InteropServices;
-using Wushu_api.Dto;
-using Wushu_api.Helper;
-using Wushu_api.Models;
+﻿using Wushu_api.Models;
 using Wushu_api.Repository;
-
 
 namespace Wushu_api.Services
 {
-    public class MatchService : IMatchService
+    public class MatchService:IMatchService
     {
-        private const int FirstRound = 0;
-        private const int SecondRound = 1;
-        private const int RoundNumber = 2;
-        private readonly ICategoryRepository _categoryRepository;
-        private readonly IParticipantRepository _participantRepository;
-        private readonly IMatchRepository _matchRepository;
         private readonly IParticipantService _participantService;
-        private readonly IRoundRepository _roundRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly IAgeCategoryRepository _ageCategoryRepository;
+        private readonly IMatchRepository _matchRepository;
+        private readonly ICategoryService _categoryService;
 
-        public MatchService(ICategoryRepository categoryRepository,
-            IParticipantRepository participantRepository, IMatchRepository matchRepository,
-            IParticipantService participantService, IRoundRepository roundRepository, IUserRepository userRepository, IAgeCategoryRepository ageCategoryRepository)
+        public MatchService(IParticipantService participantService, IMatchRepository matchRepository, ICategoryService categoryService)
         {
-
-            _categoryRepository = categoryRepository;
-            _participantRepository = participantRepository;
-            _matchRepository = matchRepository;
             _participantService = participantService;
-            _roundRepository = roundRepository;
-            _userRepository = userRepository;
-            _ageCategoryRepository = ageCategoryRepository;
-        }
-        private async Task AddRoundInMatches(Match match)
-        {
-            for (int i = 0; i < RoundNumber; i++)
-            {
-                Round round = new Round();
-                round.Match = match;
-                await _roundRepository.AddRound(round);
-            }
+            _matchRepository = matchRepository;
+            _categoryService = categoryService;
         }
 
-        private async Task<int> AddParticipantsInMatches(IEnumerable<Participant> participants)
+        public async Task HandleParticipantsNumber(Guid competitionId)
         {
-            int latest = 0;
-            int numberParticipants = participants.Count();
-            if (numberParticipants % 2 == 0)
-            {
-                for (int index = 0; index < numberParticipants; index++)
-                {
-                    Match match = new Match();
-                    match.CompetitorFirst = participants.ElementAt(index);
-                    match.CompetitorFirstId = participants.ElementAt(index).Id;
-                    index++;
-                    match.CompetitorSecond = participants.ElementAt(index);
-                    match.CompetitorSecondId=participants.ElementAt(index).Id;
-                    await _matchRepository.AddMatch(match);
-                    await AddRoundInMatches(match);
-                    latest = index;
-                }
-            }
-            return latest;
-        }
-
-        public async Task<IEnumerable<Match>> GetMatchesForCategory(Guid categoryId)
-        {
-            var matches = await _matchRepository.GetMatchesCategory(categoryId);
-            return matches;
-        }
-
-        public async Task GenerateMatches(Guid eventId)
-        {
-            int latest = 0;
-            var categories = await _categoryRepository.GetCategorieForEventId(eventId);
+            var categories = await _categoryService.GetCategoriesForCompetitionId(competitionId);
             foreach (var category in categories)
             {
-
-                var participants = await _participantRepository.GetParticipantsForCategoryAndCompetition(category.Id, eventId);
-                int participantsNumber = await _participantRepository.GetParticipantNumberForCategoryAndCompetition(category.Id, eventId);
-                int totalNumberOfMatches = participantsNumber - 1;//this is the formula to calculate the total number of matches
-                int numberOfPlayedMatches = await _matchRepository.MatchesPlayed(category.Id);
-                if (totalNumberOfMatches > 0)
+                var participants = await _participantService.GetParticipantsRandomCategoyAndCompetition(category.Id,competitionId);
+                if (participants.Count() % 2 != 0)
                 {
-                    if (totalNumberOfMatches - numberOfPlayedMatches > 0 && numberOfPlayedMatches > 0)
-                    {
-                        if (latest == 1)
-                        {
-                            break;
-                        }
-                        var winners = await GetLatestWinners(latest, category.Id);
-                        latest = await AddParticipantsInMatches(winners);
-
-                    }
-                    if (numberOfPlayedMatches == 0)
-                    {
-                        latest = await AddParticipantsInMatches(participants);
-                    }
+                    await AddOddParticipantsNumberInMatches(participants);
                 }
-
-            }
-        }
-        private async Task<Participant> GetWinnerCategory(Guid categoryId)
-        {
-            var winners = await _matchRepository.GetWinnersMatches(categoryId);
-            var winner = winners.FirstOrDefault();
-            return winner;
-        }
-        private async Task<IEnumerable<Participant>> GetLatestWinners(int latest, Guid categoryId)
-        {
-            var winners = await _matchRepository.GetWinnersMatches(categoryId);
-            var winnersLatest = new List<Participant>();
-
-            for (int index = winners.Count() - 1; index >= latest; index--)
-            {
-                var winner = winners.ElementAt(index);
-                winnersLatest.Add(winner);
-            }
-            return winnersLatest;
-        }
-        public async Task DistributeReferee(Guid eventId)
-        {
-            var categories = await _categoryRepository.GetCategorieForEventId(eventId);
-            var referee = await _userRepository.GetAllUsers();
-            foreach (var category in categories)
-            {
-                var matches = await _matchRepository.GetMatchesNoWinnerAndNoUser(category.Id);
-                if (matches.Count() == referee.Count())
+                if (participants.Count() % 2 == 0)
                 {
-                    int indexStart = 0;
-                    await RefereesEqualMatches(matches, referee,indexStart);
+                    await AddParticipantsInMatches(participants);//Add participants in matches no restrictions
                 }
-                if (matches.Count() > referee.Count())
+                if (participants.Count() == 3)
                 {
-                    await MatchesGraterReferee(matches, referee);
-                }
-                if (matches.Count() < referee.Count())
-                {
-                    int indexStart = 0;
-                    await RefereesEqualMatches(matches, referee, indexStart);
+                    //Add participants in matches special case
                 }
             }
+
         }
 
-        private async Task RefereesEqualMatches(IEnumerable<Match> matches, IEnumerable<User> users,int indexStartMatch)
+        ///<summary>
+        /// in each step take first two participants and add these participants into a match
+        /// remove these two participants from list
+        /// </summary>
+        private async Task AddParticipantsInMatches(IEnumerable<Participant> participants)
         {
-            int indexUser = 0;
-            for (int indexMatch = indexStartMatch; indexMatch < matches.Count(); indexMatch++)
+            var participantsList = participants.ToList(); //create a copy of this list in order to remove elements for it
+            while(participantsList.Any())
             {
-                
-                Match match = matches.ElementAt(indexMatch);
-                User user = users.ElementAt(indexUser);
-                await _matchRepository.AddRefereeInMatch(user.Id, match.Id);
-                indexUser++;
+                var participantFirst = participantsList.First();
+                participantsList.Remove(participantFirst);
+                var participantSecond = participantsList.First();
+                participantsList.Remove(participantFirst);
+                await _matchRepository.AddParticipantsInMatch(participantFirst, participantSecond);
             }
         }
-        private async Task MatchesGraterReferee(IEnumerable<Match> matches, IEnumerable<User> users)
+
+        /// <summary>
+        /// First we get a list of shuffling participants
+        /// Create a temporary list
+        /// Remove first participant form that list (all participants are in a random position)
+        /// now we have an even number of participants 
+        /// </summary>
+        private async Task AddOddParticipantsNumberInMatches(IEnumerable<Participant> participants)
         {
-            int refereeCount=users.Count();
-            int matchesCount=matches.Count();
-            int indexMatch = 0;
-            int indexReferee = 0;
-
-            while (matchesCount > refereeCount)
-            {
-                Match match = matches.ElementAt(indexMatch);
-                User user = users.ElementAt(indexReferee);
-                await _matchRepository.AddRefereeInMatch(user.Id, match.Id);
-                if(indexReferee != refereeCount-1 ) 
-                {
-                    indexReferee++;
-                }
-                else
-                {
-                    indexReferee = 0;
-                }
-
-                
-                indexMatch++;
-                matchesCount--;
-
-            }
-            if (matchesCount == refereeCount)
-            {
-                await RefereesEqualMatches(matches, users, matchesCount);
-                
-            }
+            var participantsList = _participantService.ShufflingParticipants(participants).ToList();
+            var luckyParticipant = participantsList.First();
+            participantsList.Remove(luckyParticipant);
+            await AddParticipantsInMatches(participantsList);
         }
 
-        public async Task SetWinnerMatch(Guid matchId,[Optional]Guid winnerId)
+        private async Task AddOnlyThreeParticipantsInMatches(IEnumerable<Participant> participants)
         {
-            var rounds=await _roundRepository.GetRoundsFromMatch(matchId);
-            var firstRoundWinner = rounds.ElementAt(FirstRound).ParticipantWinnerId;
-            var secondRoundWinner=rounds.ElementAt(SecondRound).ParticipantWinnerId;
-
-            if (firstRoundWinner==secondRoundWinner)
-            {
-                await _matchRepository.SetWinnerMatch(matchId, (Guid)firstRoundWinner);
-            }
-            if(secondRoundWinner!=firstRoundWinner)
-            {
-                await _matchRepository.SetWinnerMatch(matchId, winnerId);
-            }
 
         }
 
-        public async Task<ParticipantDto> GetParticipantWinner(Guid matchId)
-        {
-            var winnerId=await _matchRepository.GetWinnerMatch(matchId);
-            var participantDto=await _participantRepository.GetParticipantDto(winnerId);
-            return participantDto;
-        }
-
-        public async Task<IEnumerable<CategoryMatchDto>>GetMatchesCategory(Guid eventId)
-        {
-            var categories = await _categoryRepository.GetCategorieForEventId(eventId);
-            List<CategoryMatchDto>categoryMatchDtos=new List<CategoryMatchDto>();
-            foreach (var category in categories)
-            {
-                var ageCategory = await _ageCategoryRepository.GetAgeCategoryById(category.AgeCategoryId);
-                CategoryMatchDto categoryMatchDto=new CategoryMatchDto();
-                categoryMatchDto.LessThanWeight=category.LessThanWeight;
-                categoryMatchDto.GraterThanWeight=category.GraterThanWeight;
-                categoryMatchDto.Seniority = ageCategory.Name;
-                categoryMatchDto.Sex=category.Sex;
-                List<MatchDto> matchesDto = new List<MatchDto>();
-                var matches=await _matchRepository.GetMatchesCategory(category.Id);
-                int matchNumber = 1;
-                foreach (var match in matches)
-                {
-                    MatchDto matchDto=new MatchDto();
-                    var participantFirst = await _participantRepository.GetParticipant(match.CompetitorFirstId);
-                    matchDto.ParticipantFirstName = participantFirst.Name;
-                    matchDto.FirstParticipantWeight = participantFirst.CategoryWeight;
-                    var participantSecond = await _participantRepository.GetParticipant(match.CompetitorSecondId);
-                    matchDto.ParticipantSecondName = participantSecond.Name;
-                    matchDto.SecondParticipantWeight = participantSecond.CategoryWeight;
-                    matchDto.MatchNumber= matchNumber;
-                    if(match.ParticipantWinnerId==null)
-                    {
-                        matchDto.WinnerMatch = "----";
-                    }
-                    else
-                    {
-                        var participantWinner = await _participantRepository.GetParticipant((Guid)match.ParticipantWinnerId);
-                        matchDto.WinnerMatch=participantWinner.Name;
-                    }
-                    matchesDto.Add(matchDto);
-                    matchNumber++;
-                }
-                categoryMatchDto.Matches = matchesDto;
-                categoryMatchDtos.Add(categoryMatchDto);
-            }
-            return categoryMatchDtos;
-        }
     }
 }

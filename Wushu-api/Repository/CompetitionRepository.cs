@@ -7,12 +7,12 @@ using Wushu_api.Models;
 
 namespace Wushu_api.Repository
 {
-    public class EventRepository:IEventRepository
+    public class CompetitionRepository:ICompetitionRepository
     {
         private readonly DataContext _dataContext;
         private readonly IMapper _mapper;
 
-        public EventRepository(DataContext dataContext,IMapper mapper)
+        public CompetitionRepository(DataContext dataContext,IMapper mapper)
         {
             _dataContext = dataContext;
             _mapper= mapper;
@@ -20,27 +20,27 @@ namespace Wushu_api.Repository
 
       
 
-        public async Task CreateEvent(Event competition)
+        public async Task CreateCompetition(Competition competition)
         {
-            _dataContext.Events.Add(competition);
+            _dataContext.Competitions.Add(competition);
             await _dataContext.SaveChangesAsync();
         }
 
-        public Task DeleteEvent(Event competition)
+        public Task DeleteCompetition(Competition competition)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<EventDto>> GetAllEvents()
+        public async Task<IEnumerable<CompetitionDto>> GetCompetitions()
         {
-            var events= _dataContext.Events.ProjectTo<EventDto>
+            var events= _dataContext.Competitions.ProjectTo<CompetitionDto>
                 (_mapper.ConfigurationProvider).ToListAsync();           
             return await events;
         }
 
-        public async Task<Event> GetEventId(Guid eventId)
+        public async Task<Competition> GetCompetitionId(Guid eventId)
         {
-            var competition=await _dataContext.Events.SingleOrDefaultAsync(element=>element.Id==eventId);
+            var competition=await _dataContext.Competitions.SingleOrDefaultAsync(element=>element.Id==eventId);
             return  competition;
         }
 

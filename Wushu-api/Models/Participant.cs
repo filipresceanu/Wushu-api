@@ -12,15 +12,17 @@ namespace Wushu_api.Models
 
         public DateTime BirthDay { get; set; }
 
-        public string? Sex { get; set; }
+        public string Sex { get; set; }
 
         public int CategoryWeight { get; set; }
 
-        public string? Color { get; set; }
+        public string Color { get; set; }
 
-       public Guid CategoryId { get; set; }
+        public Guid CategoryId { get; set; }
 
-        public Category? Category { get; set; }
+        public Category Category { get; set; }
+
+        public bool CompeteInNextMatch { get; set; } = true;
 
         public int calculateAge(DateTime birthDay)
         {
@@ -30,10 +32,10 @@ namespace Wushu_api.Models
 
         }
 
-        public string GetAgeCategory(int age,AgeCategory ageCategory)
+        public string GetAgeCategory(int age, AgeCategory ageCategory)
         {
-            
-            if (age<= ageCategory.LessThanAge && age>= ageCategory.GraterThanAge)
+
+            if (age <= ageCategory.LessThanAge && age >= ageCategory.GraterThanAge)
             {
                 return ageCategory.Name;
             }
@@ -41,7 +43,7 @@ namespace Wushu_api.Models
         }
 
         [InverseProperty("CompetitorFirst")]
-        public  ICollection<Match> MatchesAsFirstCompetitor { get; set; }
+        public ICollection<Match> MatchesAsFirstCompetitor { get; set; }
 
         [InverseProperty("CompetitorSecond")]
         public ICollection<Match> MatchesAsSecondCompetitor { get; set; }

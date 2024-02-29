@@ -7,12 +7,12 @@ namespace Wushu_api.Services
 {
     public class CategoryService : ICategoryService
     {
-        private ICategoryRepository _categoryRepository;
-        private readonly IEventRepository _eventRepository;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly ICompetitionRepository _eventRepository;
         private readonly IAgeCategoryRepository _ageCategoryRepository;     
         private readonly IMapper _mapper;
 
-        public CategoryService(ICategoryRepository categoryRepository, IEventRepository eventRepository, IMapper mapper, IAgeCategoryRepository ageCategoryRepository)
+        public CategoryService(ICategoryRepository categoryRepository, ICompetitionRepository eventRepository, IMapper mapper, IAgeCategoryRepository ageCategoryRepository)
         {
             _categoryRepository = categoryRepository;
             _eventRepository = eventRepository;
@@ -21,12 +21,12 @@ namespace Wushu_api.Services
         }
 
         public async Task CreateCategory(CategoryDto categoryDto,
-            Guid eventId,Guid categoryAgeId)
+            Guid competitionId,Guid categoryAgeId)
         {
-            var eventCategory=await _eventRepository.GetEventId(eventId);
+            var eventCategory=await _eventRepository.GetCompetitionId(competitionId);
             var ageCategory=await _ageCategoryRepository.GetAgeCategoryById(categoryAgeId);
             var category = _mapper.Map<Category>(categoryDto);
-            category.Event = eventCategory;
+            category.Competition = eventCategory;
             category.AgeCategory = ageCategory;
             await _categoryRepository.CreateCategory(category);
         }
@@ -41,13 +41,13 @@ namespace Wushu_api.Services
             return await _categoryRepository.GetAllCategoriesDto();
         }
 
-        public async Task<IEnumerable<CategoryDataDto>> GetCategoryData(Guid eventId)
+        public async Task<IEnumerable<CategoryDataDto>> GetCategoryData(Guid competitionId)
         {
-            var categories=await _categoryRepository.GetCategorieForEventId(eventId);
+            var categories=await _categoryRepository.GetCategorieForCompetitionId(competitionId);
             List<CategoryDataDto> data = new List<CategoryDataDto>();
             foreach(var category in categories)
             {
-                CategoryDataDto categoryDataDto = new CategoryDataDto();
+                var categoryDataDto = new CategoryDataDto();
                 var ageCategoryId = category.AgeCategoryId;
                 var ageCategory = await _ageCategoryRepository.GetAgeCategoryById(ageCategoryId);
                 categoryDataDto.Name=ageCategory.Name;
@@ -59,6 +59,13 @@ namespace Wushu_api.Services
                 data.Add(categoryDataDto);
             }
             return data;
+        }
+
+        public async Task<IEnumerable<CategoryDto>>GetCategoriesForCompetitionId(Guid competitionId)
+        {
+            var categories = await _categoryRepository.GetCategorieForCompetitionId(competitionId);
+            var categoriesDto= categories.Select(category=>_mapper.Map<CategoryDto>(category));
+            return categoriesDto;
         }
     }
 }

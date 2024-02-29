@@ -58,14 +58,14 @@ namespace Wushu_api.Repository
         public async Task<IEnumerable<Participant>> GetParticipantsDataForCompetitionId(Guid competitionId)
         {
            
-            var participants=await _dataContext.Participants.Where(elem => elem.Category.Event.Id == competitionId).ToListAsync();
+            var participants=await _dataContext.Participants.Where(elem => elem.Category.Competition.Id == competitionId).ToListAsync();
             return participants;
         }
 
         public async Task<IEnumerable<Participant>> GetParticipantsForCategoryAndCompetition(Guid categoryId, Guid competitionId)
         {
             try { 
-                var participants = await _dataContext.Participants.Where(participant=>participant.Category.Id==categoryId && participant.Category.Event.Id== competitionId).ToListAsync();
+                var participants = await _dataContext.Participants.Where(participant=>participant.Category.Id==categoryId && participant.Category.Competition.Id==competitionId).ToListAsync();
                 return  participants;
             }
             catch (Exception ex)
@@ -77,7 +77,7 @@ namespace Wushu_api.Repository
         public async Task<IEnumerable<ParticipantDto>> GetParticipantsForCompetitionId(Guid competitionId)
         {
           
-            var participants =  _dataContext.Participants.Where(elem => elem.Category.Event.Id == competitionId)
+            var participants =  _dataContext.Participants.Where(elem => elem.Category.Competition.Id == competitionId)
                 .ProjectTo<ParticipantDto>(_mapper.ConfigurationProvider).ToListAsync();
                 
             return await participants;
@@ -93,7 +93,7 @@ namespace Wushu_api.Repository
         {
             try
             {
-                var participants = await _dataContext.Participants.Where(participant => participant.Category.Id == categoryId && participant.Category.Event.Id == competitionId).ToListAsync();
+                var participants = await _dataContext.Participants.Where(participant => participant.Category.Id == categoryId && participant.Category.Competition.Id == competitionId).ToListAsync();
                 return participants.Count();
             }
             catch (Exception ex)

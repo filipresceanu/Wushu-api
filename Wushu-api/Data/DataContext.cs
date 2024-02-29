@@ -5,21 +5,15 @@ using Wushu_api.Models;
 
 namespace Wushu_api.Data
 {
-    public class DataContext: IdentityDbContext<User>
+    public class DataContext:DbContext
     {
         public DataContext(DbContextOptions<DataContext> options) : base(options) 
         {
 
         }
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            base.OnConfiguring(optionsBuilder);
-            optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=wushudb;Trusted_Connection=true");
-        }
-
         public DbSet<Match> Matches { get; set; }
         public DbSet<Participant> Participants { get; set; }
-        public DbSet<Event> Events { get; set; }
+        public DbSet<Competition> Competitions { get; set; }
 
         public DbSet<Category> Categories { get; set; }
 
@@ -51,11 +45,6 @@ namespace Wushu_api.Data
 
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<IdentityRole>()
-                .HasData(
-                    new IdentityRole { Name = "Referee", NormalizedName = "REFEREE" },
-                    new IdentityRole { Name = "Admin", NormalizedName = "ADMIN" }
-                );
         }
        
 

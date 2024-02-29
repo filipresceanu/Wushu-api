@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Wushu_api.Dto;
 using Wushu_api.Services;
 
 namespace Wushu_api.Controllers
@@ -27,6 +28,26 @@ namespace Wushu_api.Controllers
             {
                 return BadRequest("unable to delete participant");
             }
+        }
+
+        [HttpPut("add-in-competition/{id}")]
+        public async Task<ActionResult> AddParticipantsInCompetition(Guid id,
+            ParticipantDto participantDto)
+        {
+            string result = await _participantService.AddParticipantsInCompetition(id,
+                participantDto);
+            if (string.IsNullOrEmpty(result))
+            {
+                return BadRequest("There is no category for this participant");
+            }
+            return Ok("success");
+        }
+
+        [HttpGet("participants-for-specific/{competitionId}")]
+        public async Task<ActionResult<IEnumerable<ParticipantDto>>> GetParticipantForCompetition(Guid competitionId)
+        {
+            var participants = await _participantService.GetParticipantsInCompetitionId(competitionId);
+            return Ok(participants);
         }
     }
 }

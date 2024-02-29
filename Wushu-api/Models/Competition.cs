@@ -2,7 +2,7 @@
 
 namespace Wushu_api.Models
 {
-    public class Event
+    public class Competition
     {
         public Guid Id { get; set; }
 

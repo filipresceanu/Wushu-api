@@ -7,11 +7,9 @@ namespace Wushu_api.Services
     public class AgeCategoryService : IAgeCategoryService
     {
         private readonly IAgeCategoryRepository _ageCategoryRepository;
-        private readonly IEventRepository _eventRepository;
-        public AgeCategoryService(IAgeCategoryRepository ageCategoryRepository, IEventRepository eventRepository)
+        public AgeCategoryService(IAgeCategoryRepository ageCategoryRepository)
         {
             _ageCategoryRepository = ageCategoryRepository;
-            _eventRepository = eventRepository;
         }
 
         public async Task CreateAgeCategory(AgeCategoryDto ageCategory)

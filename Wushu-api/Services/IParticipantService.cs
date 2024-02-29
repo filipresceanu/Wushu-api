@@ -7,12 +7,13 @@ namespace Wushu_api.Services
     {
         Task<string> AddParticipantsInCompetition(Guid competitionId, ParticipantDto participantDto);
 
-        Task<IEnumerable<ParticipantDto>> GetParticipantsInCompetitionId(Guid competiton);
+        Task<IEnumerable<ParticipantDto>> GetParticipantsInCompetitionId(Guid competitionId);
 
         Task<IEnumerable<Participant>> GetParticipantsDataInCompetitionId(Guid competiton);
 
-        Task<IEnumerable<Participant>> GetParticipantsShufflingForCategoyCompetition(Guid categoryId, Guid competitionId);
+        Task<IEnumerable<Participant>> GetParticipantsRandomCategoyAndCompetition(Guid categoryId, Guid competitionId);
 
+        IEnumerable<Participant> ShufflingParticipants(IEnumerable<Participant> participants);
         Task DeleteParticipant(Guid id);
     }
 }
