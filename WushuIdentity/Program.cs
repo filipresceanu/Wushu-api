@@ -1,9 +1,11 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using WushuIdentity.Configurations;
 using WushuIdentity.Data;
+using WushuIdentity.Helper;
 
 namespace WushuIdentity
 {
@@ -19,6 +21,7 @@ namespace WushuIdentity
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddScoped<IdentityHelper>();
             builder.Services.AddDbContext<DataContext>(opt =>
             {
                 opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -47,6 +50,9 @@ namespace WushuIdentity
                     ValidateLifetime=true
                 };
             });
+            builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedEmail = false)
+                .AddEntityFrameworkStores<DataContext>();
+                
 
             var app = builder.Build();
 
