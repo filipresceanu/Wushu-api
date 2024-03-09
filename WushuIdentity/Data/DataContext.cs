@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using WushuIdentity.Models;
 
 namespace WushuIdentity.Data
 {
@@ -9,5 +10,7 @@ namespace WushuIdentity.Data
         {
 
         }
+
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
     }
 }

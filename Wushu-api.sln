@@ -5,7 +5,7 @@ VisualStudioVersion = 17.5.33424.131
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WushuIdentity", "WushuIdentity\WushuIdentity.csproj", "{5143D0F2-1E76-4DED-BE13-9F5C981851C4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WushuParticipants", "WushuParticipants\WushuParticipants.csproj", "{79D6A1CC-1FB8-43F9-A189-82283F1CE942}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WushuParticipants", "WushuParticipants\WushuParticipants.csproj", "{C1316774-D27C-494D-9920-72C0343E072D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{5143D0F2-1E76-4DED-BE13-9F5C981851C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5143D0F2-1E76-4DED-BE13-9F5C981851C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5143D0F2-1E76-4DED-BE13-9F5C981851C4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{79D6A1CC-1FB8-43F9-A189-82283F1CE942}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{79D6A1CC-1FB8-43F9-A189-82283F1CE942}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{79D6A1CC-1FB8-43F9-A189-82283F1CE942}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{79D6A1CC-1FB8-43F9-A189-82283F1CE942}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1316774-D27C-494D-9920-72C0343E072D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1316774-D27C-494D-9920-72C0343E072D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1316774-D27C-494D-9920-72C0343E072D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1316774-D27C-494D-9920-72C0343E072D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

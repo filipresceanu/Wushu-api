@@ -6,6 +6,8 @@ using Microsoft.IdentityModel.Tokens;
 using WushuIdentity.Configurations;
 using WushuIdentity.Data;
 using WushuIdentity.Helper;
+using WushuIdentity.Repository;
+using WushuIdentity.Repository.Interfaces;
 
 namespace WushuIdentity
 {
@@ -22,12 +24,24 @@ namespace WushuIdentity
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddScoped<IdentityHelper>();
+            builder.Services.AddScoped<IRefreshTokenRepository,RefreshTokenRepository>();
             builder.Services.AddDbContext<DataContext>(opt =>
             {
                 opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
 
             builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection("JwtConfig"));
+
+            var key = Encoding.ASCII.GetBytes(builder.Configuration.GetSection("JwtConfig:Secret").Value);
+            var tokenValidationParams= new TokenValidationParameters()
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = false, //for dev
+                ValidateAudience = false, //for dev
+                RequireAudience = false, //for dev -- needs to be updated when refresh token is added
+                ValidateLifetime = true
+            };
 
             builder.Services.AddAuthentication(options =>
             {
@@ -37,22 +51,14 @@ namespace WushuIdentity
             })
             .AddJwtBearer(jwt =>
             {
-                var key = Encoding.ASCII.GetBytes(builder.Configuration.GetSection("JwtConfig:Secret").Value);
-
                 jwt.SaveToken = true;
-                jwt.TokenValidationParameters = new TokenValidationParameters()
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false, //for dev
-                    ValidateAudience = false, //for dev
-                    RequireAudience = false, //for dev -- needs to be updated when refresh token is added
-                    ValidateLifetime=true
-                };
+                jwt.TokenValidationParameters = tokenValidationParams;
             });
+
             builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedEmail = false)
                 .AddEntityFrameworkStores<DataContext>();
-                
+
+            builder.Services.AddSingleton(tokenValidationParams);
 
             var app = builder.Build();
 

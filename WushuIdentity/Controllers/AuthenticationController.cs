@@ -1,7 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualBasic.CompilerServices;
 using WushuIdentity.Configurations;
+using WushuIdentity.Data;
 using WushuIdentity.DTOs;
 using WushuIdentity.Helper;
 using WushuIdentity.Models;
@@ -10,17 +14,17 @@ namespace WushuIdentity.Controllers
 {
     [Route("api/[controller]")] // api/authentication
     [ApiController]
-    public class AuthenticationController:ControllerBase
+    public class AuthenticationController : ControllerBase
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IdentityHelper _identityHelper;
-        private readonly IConfiguration _configuration;
+        private readonly JwtConfig _jwtConfig;
 
-        public AuthenticationController(UserManager<IdentityUser> userManager, IdentityHelper identityHelper, IConfiguration configuration)
+        public AuthenticationController(UserManager<IdentityUser> userManager, IdentityHelper identityHelper, IOptions<JwtConfig> jwtConfig)
         {
             _userManager = userManager;
             _identityHelper = identityHelper;
-            _configuration = configuration;
+            _jwtConfig = jwtConfig.Value;
         }
 
         [HttpPost]
@@ -72,13 +76,10 @@ namespace WushuIdentity.Controllers
                 if (isCreated.Succeeded)
                 {
                     // Generate the token
-                    var jwtKey = _configuration.GetSection("JwtConfig:Secret").Value;
-                    var token = _identityHelper.GenerateJwtToken(newUser, jwtKey);
-                    return Ok(new AuthResult()
-                    {
-                        Result = true,
-                        Token = token
-                    });
+                    var jwtSecret = _jwtConfig.Secret;
+                    var jwtExpire = _jwtConfig.ExpirationTime.ToString();
+                    var jwtToken = await _identityHelper.GenerateJwtToken(newUser, jwtSecret, jwtExpire);
+                    return Ok(jwtToken);
                 }
 
                 return BadRequest(new AuthResult()
@@ -96,7 +97,7 @@ namespace WushuIdentity.Controllers
 
         [Route("Login")]
         [HttpPost]
-        public async Task<IActionResult> Login([FromBody]UserLoginRequestDto loginRequest)
+        public async Task<IActionResult> Login([FromBody] UserLoginRequestDto loginRequest)
         {
             if (ModelState.IsValid)
             {
@@ -115,7 +116,7 @@ namespace WushuIdentity.Controllers
                     });
                 }
 
-                var isCorrect =await _userManager.CheckPasswordAsync(existingUser, loginRequest.Password);
+                var isCorrect = await _userManager.CheckPasswordAsync(existingUser, loginRequest.Password);
 
                 if (!isCorrect)
                 {
@@ -128,14 +129,10 @@ namespace WushuIdentity.Controllers
                         Result = false
                     });
                 }
-                var jwtKey = _configuration.GetSection("JwtConfig:Secret").Value;
-                var jwtToken = _identityHelper.GenerateJwtToken(existingUser, jwtKey);
-                return Ok(new AuthResult()
-                {
-                    Token = jwtToken,
-                    Result = true
-                });
-
+                var jwtSecret = _jwtConfig.Secret;
+                var jwtExpire = _jwtConfig.ExpirationTime.ToString();
+                var jwtToken = await _identityHelper.GenerateJwtToken(existingUser, jwtSecret, jwtExpire);
+                return Ok(jwtToken);
 
             }
 
@@ -150,7 +147,38 @@ namespace WushuIdentity.Controllers
 
         }
 
+        [HttpPost]
+        [Route("RefreshToken")]
+        public async Task<IActionResult> RefreshToken([FromBody] TokenRequest tokenRequest)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = _identityHelper.VerifyAndGenerateToken(tokenRequest);
 
+                if (result == null)
+                {
+                    return BadRequest(new AuthResult()
+                    {
+                        Errors = new List<string>()
+                        {
+                            "Invalid parameters"
+                        },
+                        Result = false
+                    });
+                }
+
+                return Ok(result);
+            }
+
+            return BadRequest(new AuthResult()
+            {
+                Errors = new List<string>()
+                {
+                    "Invalid parameters"
+                },
+                Result = false
+            });
+        }
 
 
 
