@@ -31,7 +31,7 @@ namespace WushuIdentity.Repository
 
         public async Task UpdateRefreshToken(RefreshToken refreshToken)
         {
-            var token = await _dataContext.RefreshTokens.FirstOrDefaultAsync(elem => elem.Id == refreshToken.Id);
+            var token = await _dataContext.RefreshTokens.FirstOrDefaultAsync(elem => elem.Token == refreshToken.Token);
             token.IsUsed = refreshToken.IsUsed;
             await _dataContext.SaveChangesAsync();
         }

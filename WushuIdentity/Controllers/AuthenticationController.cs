@@ -153,7 +153,7 @@ namespace WushuIdentity.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result = _identityHelper.VerifyAndGenerateToken(tokenRequest);
+                var result = await _identityHelper.VerifyAndGenerateToken(tokenRequest);
 
                 if (result == null)
                 {
